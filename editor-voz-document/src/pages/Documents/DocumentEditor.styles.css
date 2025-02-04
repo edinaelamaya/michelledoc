@@ -1,0 +1,66 @@
+.document-editor {
+    padding: 2rem;
+    height: 100%;
+  }
+  
+  .editor-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(125, 211, 252, 0.1);
+  }
+  
+  .document-title-input {
+    flex: 1;
+    font-size: 1.5rem;
+    padding: 0.5rem;
+    background: none;
+    border: 1px solid transparent;
+    color: var(--text-primary);
+    border-radius: 4px;
+  }
+  
+  .document-title-input:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    background: rgba(125, 211, 252, 0.1);
+  }
+  
+  .save-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--accent-blue);
+    color: var(--background-dark);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .save-button:hover {
+    transform: translateY(-1px);
+    background: #38bdf8;
+  }
+  
+  .voice-instructions {
+    background: var(--background-medium);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+  }
+  
+  .voice-commands {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+  
+  .voice-commands span {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }

@@ -1,0 +1,89 @@
+.ai-assistant {
+    position: fixed;
+    right: 2rem;
+    top: 100px;
+    width: 300px;
+    background: var(--background-medium);
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(125, 211, 252, 0.1);
+  }
+  
+  .ai-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .ai-header h3 {
+    color: var(--text-primary);
+    margin: 0;
+  }
+  
+  .ai-status {
+    font-size: 0.8rem;
+    color: var(--accent-blue);
+  }
+  
+  .ai-input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .ai-prompt-input {
+    width: 100%;
+    min-height: 100px;
+    padding: 0.75rem;
+    border-radius: 8px;
+    background: var(--background-dark);
+    border: 1px solid rgba(125, 211, 252, 0.1);
+    color: var(--text-primary);
+    resize: vertical;
+  }
+  
+  .ai-generate-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: var(--accent-blue);
+    color: var(--background-dark);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .ai-generate-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  .ai-generate-button:hover:not(:disabled) {
+    transform: translateY(-1px);
+    background: #38bdf8;
+  }
+  
+  .ai-commands {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(125, 211, 252, 0.1);
+  }
+  
+  .ai-commands p {
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .ai-commands span {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+  }

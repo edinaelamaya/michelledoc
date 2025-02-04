@@ -1,0 +1,30 @@
+.home-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #1e293b;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  }
+  
+  .editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #334155;
+  }
+  
+  .voice-commands-hint {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: #0f172a;
+    border-radius: 12px;
+    color: #94a3b8;
+  }
+  
+  .voice-commands-hint ul {
+    margin: 1rem 0 0 1.5rem;
+    list-style-type: circle;
+  }

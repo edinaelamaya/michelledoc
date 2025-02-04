@@ -1,0 +1,106 @@
+.documents-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  
+  .documents-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(125, 211, 252, 0.1);
+  }
+  
+  .documents-header h1 {
+    color: var(--text-primary);
+    font-size: 1.8rem;
+  }
+  
+  .new-document-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: var(--accent-blue);
+    color: var(--background-dark);
+    padding: 0.75rem 1.25rem;
+    border-radius: 24px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+  
+  .new-document-button:hover {
+    background-color: #38bdf8;
+    transform: translateY(-1px);
+  }
+  
+  .documents-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .document-card {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    background: var(--background-medium);
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+  }
+  
+  .document-card:hover {
+    background: var(--background-light);
+    border-color: var(--accent-blue);
+  }
+  
+  .document-icon {
+    color: var(--accent-blue);
+    font-size: 1.5rem;
+    margin-right: 1rem;
+  }
+  
+  .document-info {
+    flex: 1;
+  }
+  
+  .document-info h3 {
+    color: var(--text-primary);
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .document-preview {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .document-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+  }
+  
+  .document-date {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+  }
+  
+  .open-button {
+    background: none;
+    border: none;
+    color: var(--accent-blue);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  
+  .open-button:hover {
+    background: rgba(125, 211, 252, 0.1);
+  }

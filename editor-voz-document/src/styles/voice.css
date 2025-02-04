@@ -1,0 +1,27 @@
+.voice-indicator {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 15px;
+    border-radius: 10px;
+    max-width: 300px;
+  }
+  
+  .transcript-box {
+    margin-top: 10px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+  }
+  
+  .voice-instructions {
+    background: #f0f0f0;
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 8px;
+  }
+
+
+  /* Estilos para la lista de documentos */

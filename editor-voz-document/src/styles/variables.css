@@ -1,0 +1,13 @@
+:root {
+    --primary-color: #2B8DFF;
+    --secondary-color: #6C757D;
+    --background-dark: #0F172A;
+    --background-medium: #1E293B;
+    --background-light: #334155;
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    --accent-blue: #7DD3FC;
+    --border-radius: 8px;
+    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }

@@ -1,0 +1,53 @@
+/* Layout Principal */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #0f172a;
+}
+
+.content-wrapper {
+  display: flex;
+  flex: 1;
+  margin-top: 70px; /* Altura del navbar */
+}
+
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  margin-left: 300px; /* Ancho del sidebar */
+  transition: margin-left 0.3s ease;
+}
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 70px;
+  bottom: 0;
+  width: 300px;
+  background: #1e293b;
+  border-right: 1px solid rgba(125, 211, 252, 0.1);
+  overflow-y: auto;
+}
+
+@media (max-width: 1200px) {
+  .main-content {
+    margin-left: 0;
+  }
+  
+  .sidebar {
+    transform: translateX(-100%);
+  }
+  
+  .sidebar.active {
+    transform: translateX(0);
+  }
+}

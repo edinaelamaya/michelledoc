@@ -1,0 +1,56 @@
+:root {
+    --primary-color: #2B8DFF;
+    --secondary-color: #6C757D;
+    --background-dark: #0F172A;
+    --background-medium: #1E293B;
+    --background-light: #334155;
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    --accent-blue: #7DD3FC;
+    --border-radius: 8px;
+    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    background: var(--background-dark);
+    color: var(--text-primary);
+    font-family: 'Segoe UI', system-ui;
+    line-height: 1.6;
+  }
+  
+  /* Layout Principal */
+  .app-container {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    grid-template-rows: 70px 1fr;
+    min-height: 100vh;
+  }
+  
+  .main-content {
+    margin-left: 300px; /* Espacio para sidebar */
+    transition: margin-left 0.3s ease;
+  }
+  
+  /* Scrollbar Personalizada */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: var(--background-medium);
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: var(--accent-blue);
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #38BDF8;
+  }
