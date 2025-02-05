@@ -7,11 +7,14 @@ const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
+    'Accept': 'application/json'
   },
+  withCredentials: true
 });
 
-// Interceptor para añadir token JWT
+// Interceptor para añadir token JWT y logging
 api.interceptors.request.use((config) => {
+  console.log('Sending request to:', config.url, 'with data:', config.data);
   const token = localStorage.getItem('voice_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -19,15 +22,37 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+api.interceptors.response.use(
+  (response) => {
+    console.log('Response received:', response.data);
+    return response;
+  },
+  (error) => {
+    console.error('API Error:', error.response?.data || error.message);
+    return Promise.reject(error);
+  }
+);
+
 export const AuthService = {
   login: async (credentials: { username: string; password: string }) => {
     const response = await api.post('/auth/login', credentials);
     return response.data;
   },
 
-  register: async (userData: { username: string; password: string; voiceSample?: string }) => {
-    const response = await api.post('/auth/register', userData);
-    return response.data;
+  register: async (userData: { 
+    username: string; 
+    email: string;
+    password: string; 
+  }) => {
+    try {
+      console.log('Attempting to register user:', { ...userData, password: '****' });
+      const response = await api.post('/auth/register', userData);
+      console.log('Registration successful:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Registration failed:', error);
+      throw error;
+    }
   },
 
   getProfile: async () => {
@@ -38,24 +63,23 @@ export const AuthService = {
 
 export const DocumentService = {
   createDocument: async (document: { title: string; content: string }) => {
-    const response = await api.post('/documents', document);
+    const response = await api.post('/api/documents', document);
     return response.data;
   },
 
   getDocuments: async () => {
-    const response = await api.get('/documents');
+    const response = await api.get('/api/documents');
     return response.data;
   },
 
-  updateDocument: async (id: string, data: any) => {
-    // Implementación mock
-    const documents = JSON.parse(localStorage.getItem('documents') || '[]');
-    const index = documents.findIndex((doc: any) => doc.id === id);
-    if (index >= 0) {
-      documents[index] = { ...documents[index], ...data };
-      localStorage.setItem('documents', JSON.stringify(documents));
-    }
-    return { data: { success: true } };
+  getDocument: async (id: number) => {
+    const response = await api.get(`/api/documents/${id}`);
+    return response.data;
+  },
+
+  updateDocument: async (id: number, document: { title: string; content: string }) => {
+    const response = await api.put(`/api/documents/${id}`, document);
+    return response.data;
   }
 };
 

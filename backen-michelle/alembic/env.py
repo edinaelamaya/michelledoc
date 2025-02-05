@@ -5,8 +5,8 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
-from infrastructure.config.settings import get_settings
-from domain.models.base import Base
+from src.app.infrastructure.config.settings import get_settings
+from src.app.infrastructure.database.base import Base
 
 settings = get_settings()
 
@@ -18,10 +18,7 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # Set the database URL in the alembic config
-config.set_main_option(
-    "sqlalchemy.url",
-    f"mysql+aiomysql://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}"
-)
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 
 # add your model's MetaData object here
 target_metadata = Base.metadata
@@ -52,7 +49,7 @@ def do_run_migrations(connection: Connection) -> None:
 async def run_async_migrations() -> None:
     """Run migrations in 'online' mode."""
     connectable = async_engine_from_config(
-        config.get_section(config.config_ini_section, {}),
+        config.get_section(config.config_ini_section),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )

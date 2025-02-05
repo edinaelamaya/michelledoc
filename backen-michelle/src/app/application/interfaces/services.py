@@ -33,6 +33,33 @@ class IVoiceService(ABC):
     async def verify_voice(self, audio_data: bytes, user_id: int) -> bool:
         pass
 
+class IPasswordHasher(ABC):
+    @abstractmethod
+    def hash_password(self, password: str) -> str:
+        pass
+
+    @abstractmethod
+    def verify_password(self, plain_password: str, hashed_password: str) -> bool:
+        pass
+
+class ITokenService(ABC):
+    @abstractmethod
+    def create_token(self, data: dict) -> str:
+        pass
+
+    @abstractmethod
+    def verify_token(self, token: str) -> Optional[dict]:
+        pass
+
+class IFileStorage(ABC):
+    @abstractmethod
+    async def save_file(self, file_data: bytes, filename: str) -> str:
+        pass
+
+    @abstractmethod
+    async def get_file(self, filename: str) -> bytes:
+        pass
+
 class IAIService(ABC):
     @abstractmethod
     async def generate_text(self, prompt: str, max_tokens: int = 500) -> str:

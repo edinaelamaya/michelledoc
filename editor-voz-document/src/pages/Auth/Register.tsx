@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 // import { useAuth } from '../../contexts/AuthContext';
 import { useVoice } from '../../contexts/VoiceContext';
 import './Register.styles.css';
+import { AuthService } from '../../services/api';
 
 export const Register = () => {
   const [userData, setUserData] = useState({
@@ -32,10 +33,29 @@ export const Register = () => {
 
   const handleSubmit = async () => {
     try {
-      // Lógica de registro
-      navigate('/login');
-    } catch (error) {
-      setError('Error en el registro');
+      // Validaciones básicas
+      if (!userData.username || !userData.email || !userData.password) {
+        setError('Todos los campos son requeridos');
+        return;
+      }
+
+      // Llamada al API de registro
+      const response = await AuthService.register({
+        username: userData.username,
+        email: userData.email,
+        password: userData.password
+      });
+
+      if (response) {
+        // Registro exitoso
+        navigate('/login', { 
+          state: { message: 'Registro exitoso. Por favor inicia sesión.' }
+        });
+      }
+    } catch (error: any) {
+      // Manejo de errores específicos
+      const errorMessage = error.response?.data?.detail || 'Error en el registro';
+      setError(errorMessage);
     }
   };
 

@@ -1,34 +1,74 @@
-import asyncio
+import time
 import logging
-from sqlalchemy.ext.asyncio import create_async_engine
-from infrastructure.config.settings import get_settings
-from infrastructure.database.connection import DATABASE_URL
-from domain.models.user import User
-from domain.models.document import Document
+import pymysql
+from app.infrastructure.config.settings import get_settings
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-async def create_database():
-    settings = get_settings()
-    
-    # Crear engine sin base de datos
-    engine = create_async_engine(
-        f"mysql+aiomysql://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}:{settings.DB_PORT}",
-        echo=True
-    )
-    
-    async with engine.connect() as conn:
-        # Crear base de datos si no existe
-        await conn.execute(f"CREATE DATABASE IF NOT EXISTS {settings.DB_NAME}")
-        await conn.execute(f"USE {settings.DB_NAME}")
-        
-        # Crear tablas
-        async with create_async_engine(DATABASE_URL).begin() as conn:
-            await conn.run_sync(User.metadata.create_all)
-            await conn.run_sync(Document.metadata.create_all)
+settings = get_settings()
+
+def wait_for_db(retries=5, delay=5):
+    for attempt in range(retries):
+        try:
+            connection = pymysql.connect(
+                host=settings.DB_HOST,
+                port=settings.DB_PORT,
+                user=settings.DB_USER,
+                password=settings.DB_PASSWORD,
+            )
+            logger.info("Database connection successful!")
+            return connection
+        except Exception as e:
+            logger.error(f"Attempt {attempt + 1}/{retries} failed: {str(e)}")
+            if attempt < retries - 1:
+                logger.info(f"Retrying in {delay} seconds...")
+                time.sleep(delay)
+    raise Exception("Could not connect to database after maximum retries")
+
+def create_database():
+    connection = None
+    try:
+        connection = wait_for_db()
+        with connection.cursor() as cursor:
+            # Crear base de datos
+            cursor.execute(f"CREATE DATABASE IF NOT EXISTS `{settings.DB_NAME}`")
+            cursor.execute(f"USE `{settings.DB_NAME}`")
             
-    logger.info("Database and tables created successfully!")
+            # Crear tabla users
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS users (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    username VARCHAR(50) UNIQUE NOT NULL,
+                    email VARCHAR(100) UNIQUE NOT NULL,
+                    hashed_password VARCHAR(255) NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            """)
+            
+            # Crear tabla documents
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS documents (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    title VARCHAR(255) NOT NULL,
+                    content TEXT NOT NULL,
+                    user_id INT NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            """)
+            
+            connection.commit()
+            logger.info("Database and tables created successfully!")
+            
+    except Exception as e:
+        logger.error(f"Error creating database: {str(e)}")
+        raise
+    finally:
+        if connection:
+            connection.close()
 
 if __name__ == "__main__":
-    asyncio.run(create_database())
+    create_database()

@@ -9,11 +9,14 @@ class DocumentService:
     async def create_document(self, user_id: int, document_data: DocumentCreate) -> DocumentInDB:
         return await self.document_repository.create(user_id, document_data)
 
-    async def get_document(self, document_id: int) -> Optional[DocumentInDB]:
-        return await self.document_repository.get_by_id(document_id)
+    async def get_document(self, document_id: int, user_id: int) -> DocumentInDB:
+        document = await self.document_repository.get_by_id(document_id, user_id)
+        if not document:
+            raise ValueError("Document not found")
+        return document
 
     async def get_user_documents(self, user_id: int) -> List[DocumentInDB]:
-        return await self.document_repository.get_by_user(user_id)
+        return await self.document_repository.get_all_by_user(user_id)
 
     async def update_document(self, document_id: int, document_data: DocumentUpdate) -> Optional[DocumentInDB]:
         current_document = await self.document_repository.get_by_id(document_id)

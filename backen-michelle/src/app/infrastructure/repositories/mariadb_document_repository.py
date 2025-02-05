@@ -20,13 +20,15 @@ class MariaDBDocumentRepository(DocumentRepository):
         await self.session.refresh(db_document)
         return db_document
 
-    async def get_by_id(self, document_id: int) -> Optional[Document]:
+    async def get_by_id(self, document_id: int, user_id: int) -> Optional[Document]:
         result = await self.session.execute(
-            select(Document).filter(Document.id == document_id)
+            select(Document)
+            .filter(Document.id == document_id)
+            .filter(Document.user_id == user_id)
         )
         return result.scalar_one_or_none()
 
-    async def get_by_user(self, user_id: int) -> List[Document]:
+    async def get_all_by_user(self, user_id: int) -> List[Document]:
         result = await self.session.execute(
             select(Document)
             .filter(Document.user_id == user_id)
@@ -34,23 +36,23 @@ class MariaDBDocumentRepository(DocumentRepository):
         )
         return result.scalars().all()
 
-    async def update(self, document_id: int, document_data: DocumentUpdate) -> Optional[Document]:
-        document = await self.get_by_id(document_id)
+    async def update(self, document_id: int, user_id: int, document_data: DocumentUpdate) -> Optional[Document]:
+        document = await self.get_by_id(document_id, user_id)
         if not document:
             return None
-            
+        
         for key, value in document_data.dict(exclude_unset=True).items():
             setattr(document, key, value)
-            
+        
         await self.session.commit()
         await self.session.refresh(document)
         return document
 
-    async def delete(self, document_id: int) -> bool:
-        document = await self.get_by_id(document_id)
+    async def delete(self, document_id: int, user_id: int) -> bool:
+        document = await self.get_by_id(document_id, user_id)
         if not document:
             return False
-            
+        
         await self.session.delete(document)
         await self.session.commit()
         return True

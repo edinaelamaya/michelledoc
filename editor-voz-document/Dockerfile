@@ -1,30 +1,27 @@
 # Etapa de desarrollo
-FROM node:18-alpine
+FROM node:18-alpine AS development
 
 WORKDIR /app
 
-RUN apk add curl
+# Instalar dependencias del sistema necesarias
+RUN apk add --no-cache curl
 
-# Crear directorios necesarios y establecer permisos
-RUN mkdir -p /app/src
-# Copiar archivos de configuración
+# Primero copiamos package.json y package-lock.json (si existe)
 COPY package*.json ./
-COPY vite.config.ts ./
-COPY tsconfig*.json ./
-COPY index.html ./
 
 # Instalar dependencias
 RUN npm install
 
-# Copiar el código fuente
-COPY ./src/ ./src/
+# Crear directorios necesarios
+RUN mkdir -p /app/src && \
+    mkdir -p /app/node_modules && \
+    chmod -R 777 /app
 
-# Asegurar permisos después de copiar
-RUN chmod -R 777 /app/src && \
-    chmod -R 777 /app/node_modules
+# Copiar todo el contenido del proyecto
+COPY . .
 
 # Exponer el puerto
-EXPOSE 5173
+EXPOSE 6800
 
 # Comando para desarrollo
 CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

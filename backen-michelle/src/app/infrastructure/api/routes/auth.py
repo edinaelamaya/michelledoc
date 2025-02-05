@@ -11,6 +11,7 @@ async def register(
     user_data: UserCreate,
     auth_service: AuthService = Depends(get_auth_service)
 ):
+    print("Intentando registrar usuario")
     try:
         user = await auth_service.register_user(user_data)
         return user
@@ -25,6 +26,7 @@ async def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     auth_service: AuthService = Depends(get_auth_service)
 ):
+    print("Intentando logear usuario")
     user = await auth_service.authenticate_user(form_data.username, form_data.password)
     if not user:
         raise HTTPException(

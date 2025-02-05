@@ -1,36 +1,45 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
-from application.services.document_service import DocumentService
-from domain.schemas.document import DocumentCreate, DocumentUpdate, DocumentResponse
-from ..dependencies.auth import get_current_user, get_document_service
+from app.application.services.document_service import DocumentService
+from app.domain.schemas.document import DocumentCreate, DocumentUpdate, DocumentResponse
+from app.infrastructure.api.dependencies.auth import get_current_user
+from app.infrastructure.database.connection import get_db
+from app.infrastructure.repositories.mariadb_document_repository import MariaDBDocumentRepository
 
 router = APIRouter()
 
 @router.post("/", response_model=DocumentResponse)
 async def create_document(
     document: DocumentCreate,
-    current_user = Depends(get_current_user),
-    document_service: DocumentService = Depends(get_document_service)
+    current_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
 ):
-    return await document_service.create_document(current_user.id, document)
+    document_repository = MariaDBDocumentRepository(db)
+    document_service = DocumentService(document_repository)
+    return await document_service.create_document(current_user["id"], document)
 
 @router.get("/", response_model=List[DocumentResponse])
-async def get_documents(
-    current_user = Depends(get_current_user),
-    document_service: DocumentService = Depends(get_document_service)
+async def get_user_documents(
+    current_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
 ):
-    return await document_service.get_user_documents(current_user.id)
+    document_repository = MariaDBDocumentRepository(db)
+    document_service = DocumentService(document_repository)
+    return await document_service.get_user_documents(current_user["id"])
 
 @router.get("/{document_id}", response_model=DocumentResponse)
 async def get_document(
     document_id: int,
-    current_user = Depends(get_current_user),
-    document_service: DocumentService = Depends(get_document_service)
+    current_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
 ):
-    document = await document_service.get_document(document_id)
-    if not document or document.user_id != current_user.id:
+    document_repository = MariaDBDocumentRepository(db)
+    document_service = DocumentService(document_repository)
+    try:
+        return await document_service.get_document(document_id, current_user["id"])
+    except ValueError:
         raise HTTPException(status_code=404, detail="Document not found")
-    return document
 
 @router.put("/{document_id}", response_model=DocumentResponse)
 async def update_document(
