@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 settings = get_settings()
 
-async def wait_for_db(retries=5, delay=5):
+async def wait_for_db(retries=10, delay=5):
     for attempt in range(retries):
         try:
             connection = await aiomysql.connect(
@@ -16,6 +16,10 @@ async def wait_for_db(retries=5, delay=5):
                 port=settings.DB_PORT,
                 user=settings.DB_USER,
                 password=settings.DB_PASSWORD,
+                charset='utf8mb4',
+                connect_timeout=30,
+                autocommit=True,
+                program_name='editor_voz_app'
             )
             return connection
         except Exception as e:

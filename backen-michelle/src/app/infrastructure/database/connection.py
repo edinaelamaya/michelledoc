@@ -11,6 +11,13 @@ engine = create_async_engine(
     echo=True,
     pool_pre_ping=True,
     pool_recycle=3600,
+    pool_size=20,
+    max_overflow=10,
+    pool_timeout=30,
+    connect_args={
+        "connect_timeout": 60,
+        "program_name": "editor_voz_app"
+    }
 )
 
 # Configurar la sesión asíncrona

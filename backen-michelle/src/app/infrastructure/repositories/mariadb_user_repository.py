@@ -4,6 +4,10 @@ from sqlalchemy import select, text
 from app.application.interfaces.repositories import IUserRepository
 from app.domain.models.user import User
 from app.domain.schemas.user import UserCreate, UserUpdate, UserInDB
+from tenacity import retry, stop_after_attempt, wait_exponential
+import logging
+
+logger = logging.getLogger(__name__)
 
 class MariaDBUserRepository(IUserRepository):
     def __init__(self, db: AsyncSession):
@@ -41,14 +45,19 @@ class MariaDBUserRepository(IUserRepository):
         user = result.scalar_one_or_none()
         return UserInDB.from_orm(user) if user else None
 
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
     async def get_by_email(self, email: str) -> UserInDB | None:
-        query = text("SELECT * FROM users WHERE email = :email")
-        result = await self.db.execute(query, {"email": email})
-        user = result.fetchone()
-        if user:
-            user_dict = dict(zip(user.keys(), user))
-            return UserInDB(**user_dict)
-        return None
+        try:
+            query = text("SELECT * FROM users WHERE email = :email")
+            result = await self.db.execute(query, {"email": email})
+            user = result.fetchone()
+            if user:
+                user_dict = dict(zip(user.keys(), user))
+                return UserInDB(**user_dict)
+            return None
+        except Exception as e:
+            logger.error(f"Error en get_by_email: {str(e)}")
+            raise
 
     async def get_by_username(self, username: str) -> UserInDB | None:
         query = text("SELECT id, username, email, password FROM users WHERE username = :username")
