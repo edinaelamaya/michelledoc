@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 settings = get_settings()
 
-def wait_for_db(retries=5, delay=5):
+async def wait_for_db(retries=5, delay=5):
     for attempt in range(retries):
         try:
             connection = pymysql.connect(
@@ -26,10 +26,10 @@ def wait_for_db(retries=5, delay=5):
                 time.sleep(delay)
     raise Exception("Could not connect to database after maximum retries")
 
-def create_database():
+async def create_database():
     connection = None
     try:
-        connection = wait_for_db()
+        connection = await wait_for_db()
         with connection.cursor() as cursor:
             # Crear base de datos
             cursor.execute(f"CREATE DATABASE IF NOT EXISTS `{settings.DB_NAME}`")
@@ -62,7 +62,6 @@ def create_database():
             
             connection.commit()
             logger.info("Database and tables created successfully!")
-            
     except Exception as e:
         logger.error(f"Error creating database: {str(e)}")
         raise
