@@ -11,7 +11,7 @@ services:
       - ./editor-voz-document:/app/src:delegated
       - /app/node_modules
     environment:
-      - VITE_API_URL=http://localhost:8000
+      - VITE_API_URL=http://3.128.255.243
       - CHOKIDAR_USEPOLLING=true
     networks:
       - app-network
