@@ -30,11 +30,11 @@ class IUserRepository(ABC):
 
 class IDocumentRepository(ABC):
     @abstractmethod
-    async def create(self, document_data: DocumentCreate) -> DocumentInDB:
+    async def create(self, user_id: int, document_data: DocumentCreate) -> DocumentInDB:
         pass
 
     @abstractmethod
-    async def get_by_id(self, document_id: int) -> Optional[DocumentInDB]:
+    async def get_by_id(self, document_id: int, user_id: Optional[int] = None) -> Optional[DocumentInDB]:
         pass
 
     @abstractmethod

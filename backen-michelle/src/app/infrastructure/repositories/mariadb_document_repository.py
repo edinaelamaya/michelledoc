@@ -1,72 +1,108 @@
 from typing import Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, or_
+from sqlalchemy import select, or_, text
 from app.domain.models.document import Document
-from app.domain.schemas.document import DocumentCreate, DocumentUpdate
+from app.domain.schemas.document import DocumentCreate, DocumentUpdate, DocumentInDB
 from app.domain.repositories.document_repository import DocumentRepository
+from app.application.interfaces.repositories import IDocumentRepository
 
-class MariaDBDocumentRepository(DocumentRepository):
-    def __init__(self, session: AsyncSession):
-        self.session = session
+class MariaDBDocumentRepository(IDocumentRepository):
+    def __init__(self, db: AsyncSession):
+        self.db = db
 
-    async def create(self, user_id: int, document: DocumentCreate) -> Document:
-        db_document = Document(
-            title=document.title,
-            content=document.content,
+    async def create(self, user_id: int, document_data: DocumentCreate) -> DocumentInDB:
+        query = text("""
+            INSERT INTO documents (title, content, user_id)
+            VALUES (:title, :content, :user_id)
+        """)
+        
+        result = await self.db.execute(
+            query,
+            {
+                "title": document_data.title,
+                "content": document_data.content,
+                "user_id": user_id
+            }
+        )
+        await self.db.commit()
+        
+        document_id = result.lastrowid
+        return DocumentInDB(
+            id=document_id,
+            title=document_data.title,
+            content=document_data.content,
             user_id=user_id
         )
-        self.session.add(db_document)
-        await self.session.commit()
-        await self.session.refresh(db_document)
-        return db_document
 
-    async def get_by_id(self, document_id: int, user_id: int) -> Optional[Document]:
-        result = await self.session.execute(
-            select(Document)
-            .filter(Document.id == document_id)
-            .filter(Document.user_id == user_id)
+    async def get_by_id(self, document_id: int, user_id: int = None) -> DocumentInDB:
+        query = text("SELECT * FROM documents WHERE id = :id")
+        result = await self.db.execute(query, {"id": document_id})
+        document = result.fetchone()
+        if document:
+            return DocumentInDB(
+                id=document.id,
+                title=document.title,
+                content=document.content,
+                user_id=document.user_id
+            )
+        return None
+
+    async def get_all_by_user(self, user_id: int) -> list[DocumentInDB]:
+        query = text("SELECT * FROM documents WHERE user_id = :user_id")
+        result = await self.db.execute(query, {"user_id": user_id})
+        documents = result.fetchall()
+        return [
+            DocumentInDB(
+                id=doc.id,
+                title=doc.title,
+                content=doc.content,
+                user_id=doc.user_id
+            ) for doc in documents
+        ]
+
+    async def update(self, document_id: int, document_data: DocumentUpdate) -> DocumentInDB:
+        query = text("""
+            UPDATE documents 
+            SET title = :title, content = :content
+            WHERE id = :id
+        """)
+        
+        await self.db.execute(
+            query,
+            {
+                "id": document_id,
+                "title": document_data.title,
+                "content": document_data.content
+            }
         )
-        return result.scalar_one_or_none()
-
-    async def get_all_by_user(self, user_id: int) -> List[Document]:
-        result = await self.session.execute(
-            select(Document)
-            .filter(Document.user_id == user_id)
-            .order_by(Document.updated_at.desc())
-        )
-        return result.scalars().all()
-
-    async def update(self, document_id: int, user_id: int, document_data: DocumentUpdate) -> Optional[Document]:
-        document = await self.get_by_id(document_id, user_id)
-        if not document:
-            return None
+        await self.db.commit()
         
-        for key, value in document_data.dict(exclude_unset=True).items():
-            setattr(document, key, value)
-        
-        await self.session.commit()
-        await self.session.refresh(document)
-        return document
+        return await self.get_by_id(document_id)
 
-    async def delete(self, document_id: int, user_id: int) -> bool:
-        document = await self.get_by_id(document_id, user_id)
-        if not document:
-            return False
-        
-        await self.session.delete(document)
-        await self.session.commit()
-        return True
+    async def delete(self, document_id: int) -> bool:
+        query = text("DELETE FROM documents WHERE id = :id")
+        result = await self.db.execute(query, {"id": document_id})
+        await self.db.commit()
+        return result.rowcount > 0
 
     async def search(self, user_id: int, query: str) -> List[Document]:
-        result = await self.session.execute(
-            select(Document)
-            .filter(
-                Document.user_id == user_id,
-                or_(
-                    Document.title.ilike(f"%{query}%"),
-                    Document.content.ilike(f"%{query}%")
-                )
-            )
-            .order_by(Document.updated_at.desc())
+        result = await self.db.execute(
+            text("""
+                SELECT * FROM documents
+                WHERE user_id = :user_id AND
+                (title LIKE :query OR content LIKE :query)
+            """),
+            {
+                "user_id": user_id,
+                "query": f"%{query}%"
+            }
         )
-        return result.scalars().all()
+        documents = result.fetchall()
+        return [
+            Document(
+                id=doc.id,
+                title=doc.title,
+                content=doc.content,
+                user_id=doc.user_id
+            ) for doc in documents
+        ]

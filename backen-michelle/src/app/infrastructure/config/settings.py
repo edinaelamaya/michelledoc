@@ -1,11 +1,11 @@
-from pydantic_settings import BaseSettings
+from pydantic import BaseSettings
 from functools import lru_cache
 
 class Settings(BaseSettings):
     # Database settings
-    DATABASE_URL: str = "mysql+pymysql://editor_user:editor_password@db:3302/editor_voz_db"
+    DATABASE_URL: str = "mysql+aiomysql://editor_user:editor_password@db:3306/editor_voz_db"
     DB_HOST: str = "db"
-    DB_PORT: int = 3302
+    DB_PORT: int = 3306
     DB_USER: str = "editor_user"
     DB_PASSWORD: str = "editor_password"
     DB_NAME: str = "editor_voz_db"

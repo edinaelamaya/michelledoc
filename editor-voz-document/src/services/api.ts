@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = 'http://localhost:8000';
 
 // Configuración inicial de Axios
 const api = axios.create({
@@ -78,8 +78,18 @@ export const DocumentService = {
   },
 
   updateDocument: async (id: number, document: { title: string; content: string }) => {
-    const response = await api.put(`/api/documents/${id}`, document);
-    return response.data;
+    try {
+      if (id) {
+        const response = await api.put(`/api/documents/${id}`, document);
+        return response.data;
+      } else {
+        const response = await api.post('/api/documents', document);
+        return response.data;
+      }
+    } catch (error) {
+      console.error('Error en la operación del documento:', error);
+      throw error;
+    }
   }
 };
 

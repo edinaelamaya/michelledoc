@@ -9,15 +9,18 @@ class DocumentBase(BaseModel):
 class DocumentCreate(DocumentBase):
     pass
 
-class DocumentUpdate(BaseModel):
+class DocumentUpdate(DocumentBase):
     title: Optional[str] = None
     content: Optional[str] = None
 
-class Document(DocumentBase):
+class DocumentInDB(DocumentBase):
     id: int
     user_id: int
-    created_at: datetime
-    updated_at: datetime
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
     class Config:
-        from_attributes = True
+        orm_mode = True
+
+class DocumentResponse(DocumentInDB):
+    pass

@@ -1,14 +1,31 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useVoice } from '../../contexts/VoiceContext';
+import { DocumentService } from '../../services/api';
 import '../../components/DocumentList/DocumentList.styles.css';
 
-const mockDocuments = [
-  { id: '1', title: 'Proyecto Final', content: '...', date: '2024-03-15' },
-  { id: '2', title: 'Notas Reunión', content: '...', date: '2024-03-14' },
-];
+interface Document {
+  id: string;
+  title: string;
+  content: string;
+  created_at: string;
+}
 
 export default function DocumentList() {
+  const [documents, setDocuments] = useState<Document[]>([]);
   const { transcript } = useVoice();
+
+  useEffect(() => {
+    const fetchDocuments = async () => {
+      try {
+        const docs = await DocumentService.getDocuments();
+        setDocuments(docs);
+      } catch (error) {
+        console.error('Error fetching documents:', error);
+      }
+    };
+    fetchDocuments();
+  }, []);
 
   return (
     <div className="documents-container">
@@ -30,7 +47,7 @@ export default function DocumentList() {
       </div>
 
       <div className="documents-grid">
-        {mockDocuments.map((doc, index) => (
+        {documents.map((doc) => (
           <div key={doc.id} className="document-card">
             <i className="bi bi-file-text document-icon"></i>
             <div className="document-info">
@@ -38,7 +55,7 @@ export default function DocumentList() {
               <p className="document-preview">{doc.content.substring(0, 80)}...</p>
               <div className="document-footer">
                 <span className="document-date">
-                  <i className="bi bi-calendar"></i> {doc.date}
+                  <i className="bi bi-calendar"></i> {new Date(doc.created_at).toLocaleDateString()}
                 </span>
                 <Link to={`/documents/${doc.id}`} className="open-button">
                   <i className="bi bi-box-arrow-up-right"></i> Abrir

@@ -4,28 +4,29 @@ from typing import Optional
 
 class UserBase(BaseModel):
     username: str
-    email: EmailStr
+    email: str
 
 class UserCreate(UserBase):
     password: str
 
-class UserUpdate(BaseModel):
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
+class UserUpdate(UserBase):
     username: Optional[str] = None
-    email: Optional[EmailStr] = None
+    email: Optional[str] = None
     password: Optional[str] = None
 
 class UserInDB(UserBase):
     id: int
-    hashed_password: str
-    created_at: datetime
-    updated_at: datetime
+    password: str
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 class UserResponse(UserBase):
     id: int
-    created_at: datetime
 
     class Config:
-        from_attributes = True
+        orm_mode = True

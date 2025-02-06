@@ -1,35 +1,69 @@
 from typing import Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, text
 from app.application.interfaces.repositories import IUserRepository
 from app.domain.models.user import User
 from app.domain.schemas.user import UserCreate, UserUpdate, UserInDB
 
 class MariaDBUserRepository(IUserRepository):
-    def __init__(self, session: AsyncSession):
-        self.session = session
+    def __init__(self, db: AsyncSession):
+        self.db = db
 
-    async def create(self, user_data: UserCreate) -> UserInDB:
-        user = User(**user_data.dict(exclude={'password'}))
-        self.session.add(user)
-        await self.session.commit()
-        await self.session.refresh(user)
-        return UserInDB.from_orm(user)
+    async def create(self, user_data: dict) -> UserInDB:
+        query = text("""
+            INSERT INTO users (username, email, password)
+            VALUES (:username, :email, :password)
+        """)
+        
+        result = await self.db.execute(
+            query,
+            {
+                "username": user_data["username"],
+                "email": user_data["email"],
+                "password": user_data["password"]
+            }
+        )
+        await self.db.commit()
+        
+        # Obtener el ID del usuario insertado
+        user_id = result.lastrowid
+        
+        # Crear y retornar el objeto UserInDB
+        return UserInDB(
+            id=user_id,
+            username=user_data["username"],
+            email=user_data["email"],
+            password=user_data["password"]
+        )
 
     async def get_by_id(self, user_id: int) -> UserInDB:
-        result = await self.session.execute(select(User).filter(User.id == user_id))
+        result = await self.db.execute(select(User).filter(User.id == user_id))
         user = result.scalar_one_or_none()
         return UserInDB.from_orm(user) if user else None
 
-    async def get_by_email(self, email: str) -> UserInDB:
-        result = await self.session.execute(select(User).filter(User.email == email))
-        user = result.scalar_one_or_none()
-        return UserInDB.from_orm(user) if user else None
+    async def get_by_email(self, email: str) -> UserInDB | None:
+        query = text("SELECT * FROM users WHERE email = :email")
+        result = await self.db.execute(query, {"email": email})
+        user = result.fetchone()
+        if user:
+            user_dict = dict(zip(user.keys(), user))
+            return UserInDB(**user_dict)
+        return None
 
-    async def get_by_username(self, username: str) -> UserInDB:
-        result = await self.session.execute(select(User).filter(User.username == username))
-        user = result.scalar_one_or_none()
-        return UserInDB.from_orm(user) if user else None
+    async def get_by_username(self, username: str) -> UserInDB | None:
+        query = text("SELECT id, username, email, password FROM users WHERE username = :username")
+        result = await self.db.execute(query, {"username": username})
+        row = result.fetchone()
+        if row:
+            # Convertir el resultado a diccionario
+            user_dict = {
+                "id": row[0],
+                "username": row[1],
+                "email": row[2],
+                "password": row[3]
+            }
+            return UserInDB(**user_dict)
+        return None
 
     async def update(self, user_id: int, user_data: UserUpdate) -> Optional[UserInDB]:
         user = await self.get_by_id(user_id)
@@ -39,8 +73,8 @@ class MariaDBUserRepository(IUserRepository):
         for key, value in user_data.dict(exclude_unset=True).items():
             setattr(user, key, value)
             
-        await self.session.commit()
-        await self.session.refresh(user)
+        await self.db.commit()
+        await self.db.refresh(user)
         return user
 
     async def delete(self, user_id: int) -> bool:
@@ -48,6 +82,6 @@ class MariaDBUserRepository(IUserRepository):
         if not user:
             return False
             
-        await self.session.delete(user)
-        await self.session.commit()
+        await self.db.delete(user)
+        await self.db.commit()
         return True

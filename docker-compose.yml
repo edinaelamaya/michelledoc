@@ -8,13 +8,14 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./backen-michelle:/app/src/
+      - ./backen-michelle/src:/app/src
     environment:
-      - DATABASE_URL=mysql+pymysql://editor_user:editor_password@db:3302/editor_voz_db
+      - PYTHONPATH=/app/src
+      - DATABASE_URL=mysql+aiomysql://editor_user:editor_password@db:3306/editor_voz_db
       - DB_USER=editor_user
       - DB_PASSWORD=editor_password
       - DB_HOST=db
-      - DB_PORT=3302
+      - DB_PORT=3306
       - DB_NAME=editor_voz_db
       - MYSQL_ROOT_PASSWORD=root_password
       - JWT_SECRET=your_super_secret_key
@@ -42,7 +43,7 @@ services:
   db:
     image: mariadb:10.11
     ports:
-      - "3302:3306"
+      - "3306:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=root_password
       - MYSQL_DATABASE=editor_voz_db

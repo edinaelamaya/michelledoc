@@ -1,10 +1,13 @@
 from typing import List, Optional
 from app.application.interfaces.repositories import IDocumentRepository
 from app.domain.schemas.document import DocumentCreate, DocumentUpdate, DocumentInDB
+from app.infrastructure.database.connection import get_db
+from sqlalchemy.ext.asyncio import AsyncSession
 
 class DocumentService:
-    def __init__(self, document_repository: IDocumentRepository):
+    def __init__(self, document_repository: IDocumentRepository, db: AsyncSession):
         self.document_repository = document_repository
+        self.db = db
 
     async def create_document(self, user_id: int, document_data: DocumentCreate) -> DocumentInDB:
         return await self.document_repository.create(user_id, document_data)
@@ -30,3 +33,7 @@ class DocumentService:
 
     async def search_documents(self, user_id: int, query: str) -> List[DocumentInDB]:
         return await self.document_repository.search(user_id, query)
+
+    async def get_documents(self, user_id: int):
+        # Lógica para obtener documentos del usuario
+        pass

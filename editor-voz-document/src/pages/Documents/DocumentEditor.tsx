@@ -45,7 +45,17 @@ export default function DocumentEditor() {
 
   const handleSaveDocument = async () => {
     try {
-      await DocumentService.updateDocument(document.id, document);
+      if (document.id) {
+        await DocumentService.updateDocument(parseInt(document.id), {
+          title: document.title,
+          content: document.content
+        });
+      } else {
+        await DocumentService.createDocument({
+          title: document.title,
+          content: document.content
+        });
+      }
       navigate('/');
     } catch (error) {
       console.error('Error al guardar:', error);
