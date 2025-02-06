@@ -11,11 +11,10 @@ services:
       - ./backen-michelle/src:/app/src
     environment:
       - PYTHONPATH=/app/src
-      - DATABASE_URL=mysql+aiomysql://editor_user:editor_password@db:3306/editor_voz_db
-      - DB_USER=editor_user
-      - DB_PASSWORD=editor_password
       - DB_HOST=db
       - DB_PORT=3306
+      - DB_USER=editor_user
+      - DB_PASSWORD=editor_password
       - DB_NAME=editor_voz_db
       - MYSQL_ROOT_PASSWORD=root_password
       - JWT_SECRET=your_super_secret_key
@@ -54,7 +53,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-      start_period: 10s
     volumes:
       - mariadb_data:/var/lib/mysql
     networks:
